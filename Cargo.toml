@@ -1,0 +1,27 @@
+
+[package]
+name = "corange-rs"
+version = "0.8.0"
+authors = ["Rod Furlan, Lucidscape <rod@lucidscape.com>"]
+build = "src/build.rs"
+license = "Apache-2.0"
+repository = "https://github.com/lucidscape/corange-rs"
+description = """
+  Rust interface to the Corange game engine, written in Pure C, SDL and OpenGL by Daniel Holden.
+  Features include: deferred rendering, UI rendering, text rendering, multiple lights, post-processing effects,
+  SSAO, shadow mapping, color correction, skeletal animation, inverse kinematics, collision detection, OpenCL support,
+  asset management, entity management, terrain, file loaders including .dds, .wav, .bmp, .obj, .smd, 3D math.
+"""
+
+[lib]
+name = "corange_rs"
+path = "src/lib.rs"
+
+[dependencies]
+libc = "0.2.2"
+gl = "0.5.2"
+sdl2-sys = "0.7.0"
+lazy_static = "0.1.*"
+
+[build-dependencies]
+gcc = "0.3.20"

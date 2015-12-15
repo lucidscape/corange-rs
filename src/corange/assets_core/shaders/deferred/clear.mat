@@ -1,0 +1,2 @@
+shader vertex = $CORANGE/shaders/deferred/clear.vs
+shader frag = $CORANGE/shaders/deferred/clear.fs
