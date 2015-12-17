@@ -3,13 +3,46 @@
 extern crate libc;
 extern crate gl;
 extern crate sdl2_sys;
+#[macro_use] extern crate lazy_static;
 
 use std::mem;
+use std::ffi::CString;
 use libc::{c_void, c_char, c_int, c_uint, c_ulong, c_float, uint32_t, c_uchar, c_double, c_long, size_t};
 use gl::types::{GLint, GLuint, GLenum};
 use sdl2_sys::event::SDL_Event;
 use sdl2_sys::video::SDL_GLContext;
 use sdl2_sys::joystick::SDL_Joystick;
+
+#[macro_export]
+macro_rules! typeId {
+    ($field_ty:ty) => {
+        type_find(CString::new(stringify!($field_ty)).unwrap().as_ptr(), mem::size_of::<$field_ty>())
+    };
+}
+
+lazy_static! {
+    // Type IDs
+    pub static ref CAMERA_TYPE:i32 = unsafe { typeId!(camera) };
+    pub static ref LIGHT_TYPE:i32 = unsafe { typeId!(light) };
+    pub static ref STATIC_TYPE:i32 = unsafe { typeId!(static_object) };
+    pub static ref INSTANCE_TYPE:i32 = unsafe { typeId!(instance_object) };
+    pub static ref ANIMATED_TYPE:i32 = unsafe { typeId!(animated_object) };
+    pub static ref PHYSICS_TYPE:i32 = unsafe { typeId!(physics_object) };
+    pub static ref PARTICLES_TYPE:i32 = unsafe { typeId!(particles) };
+    pub static ref LANDSCAPE_TYPE:i32 = unsafe { typeId!(landscape) };
+    pub static ref BROWNSER_TYPE:i32 = unsafe { typeId!(ui_browser) };
+    pub static ref BUTTON_TYPE:i32 = unsafe { typeId!(ui_button) };
+    pub static ref DIALOG_TYPE:i32 = unsafe { typeId!(ui_dialog) };
+    pub static ref LISTBOX_TYPE:i32 = unsafe { typeId!(ui_listbox) };
+    pub static ref OPTION_TYPE:i32 = unsafe { typeId!(ui_option) };
+    pub static ref RECTANGLE_TYPE:i32 = unsafe { typeId!(ui_rectangle) };
+    pub static ref SLIDER_TYPE:i32 = unsafe { typeId!(ui_slider) };
+    pub static ref SPINNER_TYPE:i32 = unsafe { typeId!(ui_spinner) };
+    pub static ref STYLE_TYPE:i32 = unsafe { typeId!(ui_style) };
+    pub static ref TEXT_TYPE:i32 = unsafe { typeId!(ui_text) };
+    pub static ref TEXTBOX_TYPE:i32 = unsafe { typeId!(ui_textbox) };
+    pub static ref TOAST_TYPE:i32 = unsafe { typeId!(ui_toast) };
+}
 
 pub const LIGHT_TYPE_POINT: c_uint = 0;
 pub const LIGHT_TYPE_DIRECTIONAL: c_uint = 1;
@@ -51,8 +84,6 @@ pub const RO_TYPE_PLANE: c_uint = 12;
 pub const RO_TYPE_LINE: c_uint = 13;
 pub const RO_TYPE_POINT: c_uint = 14;
 
-use std::ffi::CString;
-
 pub fn str(input:&'static str) -> *mut i8 {
     CString::new(input).unwrap().into_raw()
 }
@@ -61,13 +92,6 @@ pub fn path(input:&'static str) -> fpath {
     unsafe {
         P(str(input))
     }
-}
-
-#[macro_export]
-macro_rules! typeId {
-    ($field_ty:ty) => {
-        type_find(CString::new(stringify!($field_ty)).unwrap().as_ptr(), mem::size_of::<$field_ty>())
-    };
 }
 
 #[repr(C)]
