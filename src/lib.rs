@@ -64,7 +64,7 @@ pub fn path(input:&'static str) -> fpath {
 }
 
 #[macro_export]
-macro_rules! typeid {
+macro_rules! typeId {
     ($field_ty:ty) => {
         type_find(CString::new(stringify!($field_ty)).unwrap().as_ptr(), mem::size_of::<$field_ty>())
     };

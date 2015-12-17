@@ -21,10 +21,10 @@ fn main() {
         let height = graphics_viewport_height() as f32;
 
         // Acquire type ids
-        let camera_type = typeid!(camera);
-        let static_type = typeid!(static_object);
-        let animated_type = typeid!(animated_object);
-        let button_type = typeid!(ui_button);
+        let camera_type = typeId!(camera);
+        let static_type = typeId!(static_object);
+        let animated_type = typeId!(animated_object);
+        let button_type = typeId!(ui_button);
 
         // Initialize camera
         let cam = entity_new_type_id(str("camera"), camera_type) as *mut camera;
