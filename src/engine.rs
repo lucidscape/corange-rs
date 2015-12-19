@@ -1,6 +1,7 @@
 use std::mem;
 use std::sync::{Arc, Mutex};
 use sdl2_sys::event::*;
+use sdl2_sys::keycode::*;
 use corange::*;
 use viewport::Viewport;
 use renderer::Renderer;
@@ -97,7 +98,7 @@ pub fn run(event_handler:Option<&Fn(SDL_Event)>, update_handler:Option<&Fn(f64, 
         let camera = entity_new_type_id(str("camera"), *CAMERA_TYPE) as *mut camera;
         update_camera(camera);
 
-        loop {
+        'main: loop {
             // Synchronize engine component settings
             update_viewport();
             update_renderer(renderer);
@@ -111,6 +112,18 @@ pub fn run(event_handler:Option<&Fn(SDL_Event)>, update_handler:Option<&Fn(f64, 
                 let mut raw = mem::uninitialized();
                 match SDL_PollEvent(&mut raw) == 1 {
                     true => {
+                        let mut event:SDL_Event = mem::transmute_copy(&raw);
+                        match *event.type_() {
+                            SDL_QUIT => break 'main,
+                            SDL_KEYUP => {
+                                match (*event.key()).keysym.sym {
+                                    SDLK_ESCAPE => break 'main,
+                                    _ => ()
+                                }
+                            }
+                            _ => ()
+                        }
+
                         // Update camera
                         let event:SDL_Event = mem::transmute_copy(&raw);
                         match camera_type {

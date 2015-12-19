@@ -3,10 +3,8 @@ extern crate sdl2_sys;
 #[macro_use] extern crate corange_rs;
 #[macro_use] extern crate lazy_static;
 
-use std::mem;
 use std::sync::{Arc, Mutex};
 use libc::c_void;
-use sdl2_sys::event::*;
 use corange_rs::corange::*;
 
 lazy_static! {
