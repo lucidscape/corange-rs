@@ -7,22 +7,16 @@ use std::mem;
 use std::sync::{Arc, Mutex};
 use libc::c_void;
 use sdl2_sys::event::*;
-use corange_rs::*;
+use corange_rs::corange::*;
+
+lazy_static! {
+    static ref SELECTED:Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
+}
 
 fn main() {
     unsafe {
         // Initialize engine and load default assets/shaders
-        corange_init(str("./src/corange/assets_core/"));
-
-        // Initialize viewport
-        graphics_viewport_set_title(str("Rendering"));
-        graphics_viewport_set_size(1280, 720);
-        let height = graphics_viewport_height() as f32;
-
-        // Initialize camera
-        let cam = entity_new_type_id(str("camera"), *CAMERA_TYPE) as *mut camera;
-        (*cam).position = vec3_new(25.0, 25.0, 10.0);
-        (*cam).target = vec3_new(0.0, 7.0, 0.0);
+        corange_rs::engine::initialize("./src/corange/assets_core/");
 
         // Initialize podium
         folder_load(path("./examples/assets/podium/"));
@@ -66,6 +60,7 @@ fn main() {
         ui_button_disable(framerate);
 
         // Initialize object label
+        let height = 720.0;
         let object = ui_elem_new_type_id(str("object"), *BUTTON_TYPE) as *mut ui_button;
         ui_button_move(object, vec2_new(10.0, height - 70.0));
         ui_button_resize(object, vec2_new(60.0, 25.0));
@@ -100,39 +95,9 @@ fn main() {
         ui_button_set_label(b_imrod, str("Imrod"));
         ui_button_set_onclick(b_imrod, Some(select_imrod));
 
-        // Initialize renderer
-        let renderer = renderer_new(asset_hndl_new_load(path("./examples/assets/graphics.cfg")));
-        renderer_set_camera(renderer, cam);
-        renderer_set_tod(renderer, 0.15, 0);
-        renderer_set_skydome_enabled(renderer, 0);
-
-        loop {
-            // Initialize frame
-            frame_begin();
-
-            // Handle SDL events
-            loop {
-                let mut raw = mem::uninitialized();
-                match SDL_PollEvent(&mut raw) == 1 {
-                    true => {
-                        // Foward events to camera controller
-                        let event:SDL_Event = mem::transmute_copy(&raw);
-                        camera_control_orbit(cam, event);
-
-                        // Foward events to UI controller
-                        let event:SDL_Event = mem::transmute_copy(&raw);
-                        ui_event(event);
-                    }
-                    false => break
-                }
-            }
-
-            // Update camera orbit
-            camera_control_joyorbit(cam, frame_time() as f32);
-
+        let update_fn = | _:f64, renderer:*mut renderer | {
             // Update UI
             ui_button_set_label(framerate, frame_rate_string());
-            ui_update();
 
             // Update animated objects
             animated_object_update(a_imrod, frame_time() as f32 * 0.25);
@@ -146,22 +111,13 @@ fn main() {
                 3 => renderer_add(renderer, render_object_animated(a_imrod)),
                 _ => ()
             }
+        };
 
-            // Render scene
-            renderer_render(renderer);
-
-            // Render UI
-            ui_render();
-
-            // Swap buffers and end frame
-            graphics_swap();
-            frame_end();
-        }
+        corange_rs::engine::set_viewport(String::from("Example"), 1280, height as usize, false, 1, 1);
+        corange_rs::engine::set_renderer(String::from("./examples/assets/graphics.cfg"), None, None, 0.0, false, false, 0.15);
+        corange_rs::engine::set_camera(vec3_new(25.0, 25.0, 10.0), vec3_new(0.0, 7.0, 0.0), 0.78, 0.1, 512.0, corange_rs::camera::CameraType::Orbit);
+        corange_rs::engine::run(None, Some(&update_fn));
     }
-}
-
-lazy_static! {
-    static ref SELECTED:Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
 }
 
 fn select(item:usize) {
