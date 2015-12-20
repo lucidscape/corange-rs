@@ -28,7 +28,7 @@ pub fn set_viewport(title:String, width:usize, height:usize, fullscreen:bool, an
         fullscreen: fullscreen,
         antialiasing: antialiasing,
         multisampling: multisampling,
-        frame: *FRAME.lock().unwrap()
+        frame: *FRAME.lock().unwrap() + 1
     };
 }
 
@@ -42,7 +42,7 @@ pub fn set_renderer(configuration: String, color_correction_texture: Option<Stri
         sea_enabled: sea_enabled,
         sky_enabled: sky_enabled,
         sky_time: sky_time,
-        frame: *FRAME.lock().unwrap()
+        frame: *FRAME.lock().unwrap() + 1
     };
 }
 
@@ -55,7 +55,7 @@ pub fn set_camera(position: vec3, target: vec3, fov: f32, near_clip: f32, far_cl
         near_clip: near_clip,
         far_clip: far_clip,
         movement: movement,
-        frame: *FRAME.lock().unwrap()
+        frame: *FRAME.lock().unwrap() + 1
     };
 }
 
@@ -89,7 +89,7 @@ fn update_camera(camera:*mut camera) -> CameraType {
 pub fn run(event_handler:Option<&Fn(SDL_Event)>, update_handler:Option<&Fn(f64, *mut renderer)>) {
     unsafe {
         // Initialize viewport
-        update_viewport();
+        VIEWPORT.lock().unwrap().clone().apply();
 
         // Initialize renderer
         let renderer = RENDERER.lock().unwrap().clone().initialize();
