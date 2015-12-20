@@ -19,6 +19,10 @@ pub fn initialize(assets_path:&'static str) {
     unsafe { corange_init(str(assets_path)) }
 }
 
+fn frame() -> u64 {
+    *FRAME.lock().unwrap()
+}
+
 /// Reconfigure viewport
 pub fn set_viewport(title:String, width:usize, height:usize, fullscreen:bool, antialiasing:usize, multisampling:usize) {
     *VIEWPORT.lock().unwrap() = Viewport {
@@ -28,7 +32,7 @@ pub fn set_viewport(title:String, width:usize, height:usize, fullscreen:bool, an
         fullscreen: fullscreen,
         antialiasing: antialiasing,
         multisampling: multisampling,
-        frame: *FRAME.lock().unwrap() + 1
+        frame: frame() + 1
     };
 }
 
@@ -42,7 +46,7 @@ pub fn set_renderer(configuration: String, color_correction_texture: Option<Stri
         sea_enabled: sea_enabled,
         sky_enabled: sky_enabled,
         sky_time: sky_time,
-        frame: *FRAME.lock().unwrap() + 1
+        frame: frame() + 1
     };
 }
 
@@ -55,14 +59,14 @@ pub fn set_camera(position: vec3, target: vec3, fov: f32, near_clip: f32, far_cl
         near_clip: near_clip,
         far_clip: far_clip,
         movement: movement,
-        frame: *FRAME.lock().unwrap() + 1
+        frame: frame() + 1
     };
 }
 
 /// Assert Corange viewport settings matches user-submitted settings
 fn update_viewport() {
     let configuration = VIEWPORT.lock().unwrap().clone();
-    if configuration.frame == *FRAME.lock().unwrap() {
+    if configuration.frame == frame() {
         configuration.apply();
     }
 }
@@ -70,7 +74,7 @@ fn update_viewport() {
 /// Assert Corange renderer settings matches user-submitted settings
 fn update_renderer(renderer:*mut renderer) {
     let configuration = RENDERER.lock().unwrap().clone();
-    if configuration.frame == *FRAME.lock().unwrap() {
+    if configuration.frame == frame() {
         configuration.apply(renderer);
     }
 }
@@ -79,7 +83,7 @@ fn update_renderer(renderer:*mut renderer) {
 fn update_camera(camera:*mut camera) -> CameraType {
     let configuration = CAMERA.lock().unwrap().clone();
     let camera_type = configuration.movement.clone();
-    if configuration.frame == *FRAME.lock().unwrap() {
+    if configuration.frame == frame() {
         configuration.apply(camera);
     }
     camera_type
@@ -88,6 +92,7 @@ fn update_camera(camera:*mut camera) -> CameraType {
 /// Enter main rendering loop
 pub fn run(event_handler:Option<&Fn(SDL_Event)>, update_handler:Option<&Fn(f64, *mut renderer)>) {
     unsafe {
+
         // Initialize viewport
         VIEWPORT.lock().unwrap().clone().apply();
 
